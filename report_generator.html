@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Laporan BACT BAUT</title>
+    <style>
+        /* CSS untuk styling halaman */
+      
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box; /* Agar padding tidak menambah lebar */
+        }
+
+        .checkbox-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 kolom */
+            gap: 10px;
+            margin-top: 10px;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-item input {
+            margin-right: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        #copyButton {
+            background-color: #2ecc71;
+        }
+        
+        #copyButton:hover {
+            background-color: #27ae60;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Generator Laporan Kekurangan</h1>
+        
+        <div class="form-group">
+            <label for="lopName">Nama LOP:</label>
+            <input type="text" id="lopName" placeholder="Contoh: PT2-25-SWT-FAC-AO...">
+        </div>
+
+        <div class="form-group">
+            <label>Pilih Kekurangan Dokumen:</label>
+            <div id="deficienciesContainer" class="checkbox-container">
+                </div>
+        </div>
+
+        <button onclick="generateReport()">Buat Laporan</button>
+
+        <div class="form-group" style="margin-top: 25px;">
+            <label for="output">Hasil Laporan (Siap Disalin):</label>
+            <textarea id="output" readonly></textarea>
+            <button id="copyButton" onclick="copyToClipboard()">Salin Teks</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Daftar semua kemungkinan kekurangan ---
+        const deficienciesList = [
+            "ODP-PB-8-8 Solid lengkap",
+            "KLEM-RING-5-LUBANG",
+            "Pipa paralon",
+            "SC-OF-SM-24",
+            "Redaman Input ODC",
+            "TESTCOM",
+            "PORT",
+            "IN ODP",
+            "End-to-End",
+            "Mancore",
+            "LABEL ODP",
+            "TERMINASI",
+            "BARCODE",
+            "SPLIITER 1:4",
+            "PANEL DISTRIBUSI",
+            "FEEDER",
+            "FOTO ODC",
+            "SURVEY",
+            "SAMBUNGAN BRANCHING"
+        ];
+
+        // --- Fungsi untuk memuat daftar kekurangan ke halaman ---
+        function loadDeficiencies() {
+            const container = document.getElementById('deficienciesContainer');
+            deficienciesList.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-item';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = item;
+                checkbox.value = item;
+                checkbox.className = 'deficiency-checkbox';
+
+                const label = document.createElement('label');
+                label.htmlFor = item;
+                label.textContent = item;
+
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                container.appendChild(div);
+            });
+        }
+        
+        // --- Fungsi utama untuk menghasilkan laporan ---
+        function generateReport() {
+            // 1. Ambil nama LOP dari input
+            const lopName = document.getElementById('lopName').value.trim();
+
+            if (!lopName) {
+                alert("Harap isi Nama LOP terlebih dahulu!");
+                return;
+            }
+
+            // 2. Kumpulkan semua kekurangan yang dicentang
+            const selectedDeficiencies = [];
+            const checkboxes = document.querySelectorAll('.deficiency-checkbox:checked');
+            checkboxes.forEach(checkbox => {
+                selectedDeficiencies.push(checkbox.value);
+            });
+
+            if (selectedDeficiencies.length === 0) {
+                alert("Harap pilih minimal satu kekurangan!");
+                return;
+            }
+
+            // 3. Gabungkan menjadi format yang diinginkan
+            let reportText = `${lopName.toUpperCase()}\n`; // Nama LOP dibuat kapital
+            reportText += `KURANG\n`;
+            reportText += selectedDeficiencies.join('\n');
+
+            // 4. Tampilkan hasilnya di textarea
+            document.getElementById('output').value = reportText;
+        }
+        
+        // --- Fungsi untuk menyalin teks ke clipboard ---
+        function copyToClipboard() {
+            const outputArea = document.getElementById('output');
+            const textToCopy = outputArea.value;
+
+            if (!textToCopy) {
+                alert("Tidak ada teks untuk disalin. Buat laporan terlebih dahulu.");
+                return;
+            }
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                // Beri notifikasi bahwa teks berhasil disalin
+                const copyButton = document.getElementById('copyButton');
+                const originalText = copyButton.innerText;
+                copyButton.innerText = 'Berhasil Disalin!';
+                setTimeout(() => {
+                    copyButton.innerText = originalText;
+                }, 2000); // Kembalikan teks tombol setelah 2 detik
+            }).catch(err => {
+                console.error('Gagal menyalin teks: ', err);
+                alert("Gagal menyalin teks.");
+            });
+        }
+        
+        // --- Panggil fungsi untuk memuat daftar saat halaman pertama kali dibuka ---
+        window.onload = loadDeficiencies;
+    </script>
+
+</body>
+</html>
