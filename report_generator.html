@@ -223,7 +223,6 @@
             }
 
             navigator.clipboard.writeText(textToCopy).then(() => {
-                // Beri notifikasi bahwa teks berhasil disalin
                 const copyButton = document.getElementById('copyButton');
                 const originalText = copyButton.innerText;
                 copyButton.innerText = 'Berhasil Disalin!';
