@@ -70,10 +70,16 @@
             margin-right: 10px;
         }
 
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
         button {
             width: 100%;
             padding: 12px;
-            background-color: #3498db;
             color: white;
             border: none;
             border-radius: 5px;
@@ -81,10 +87,15 @@
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.3s;
-            margin-top: 10px;
+        }
+        
+        #generateButton {
+             background-color: #3498db;
+             /* Menjadikan tombol ini memenuhi 2 kolom */
+             grid-column: 1 / -1;
         }
 
-        button:hover {
+        #generateButton:hover {
             background-color: #2980b9;
         }
 
@@ -94,6 +105,14 @@
         
         #copyButton:hover {
             background-color: #27ae60;
+        }
+
+        #resetButton {
+            background-color: #e74c3c;
+        }
+
+        #resetButton:hover {
+            background-color: #c0392b;
         }
 
         textarea {
@@ -125,42 +144,36 @@
                 </div>
         </div>
 
-        <button onclick="generateReport()">Buat Laporan</button>
+        <button id="generateButton" onclick="generateReport()">Buat Laporan</button>
 
         <div class="form-group" style="margin-top: 25px;">
             <label for="output">Hasil Laporan (Siap Disalin):</label>
             <textarea id="output" readonly></textarea>
-            <button id="copyButton" onclick="copyToClipboard()">Salin Teks</button>
+            <div class="button-group">
+                <button id="copyButton" onclick="copyToClipboard()">Salin Teks</button>
+                <button id="resetButton" onclick="resetForm()">Ulangi</button>
+            </div>
         </div>
     </div>
 
     <script>
         // --- Daftar semua kemungkinan kekurangan ---
         const deficienciesList = [
-            "ODP-PB-8-8 Solid lengkap",
-            "KLEM-RING-5-LUBANG",
-            "Pipa paralon",
-            "SC-OF-SM-24",
-            "Redaman Input ODC",
-            "TESTCOM",
-            "PORT",
-            "IN ODP",
-            "End-to-End",
-            "Mancore",
-            "LABEL ODP",
-            "TERMINASI",
-            "BARCODE",
-            "SPLIITER 1:4",
-            "PANEL DISTRIBUSI",
-            "FEEDER",
-            "FOTO ODC",
-            "SURVEY",
+            "ODP-PB-8-8 Solid lengkap", "KLEM-RING-5-LUBANG", "Pipa paralon",
+            "SC-OF-SM-24", "Redaman Input ODC", "TESTCOM", "PORT", "IN ODP",
+            "End-to-End", "Mancore", "LABEL ODP", "TERMINASI", "BARCODE",
+            "SPLIITER 1:4", "PANEL DISTRIBUSI", "FEEDER", "FOTO ODC", "SURVEY",
             "SAMBUNGAN BRANCHING"
         ];
 
+        // --- Variabel global untuk elemen yang sering diakses ---
+        const lopNameInput = document.getElementById('lopName');
+        const outputArea = document.getElementById('output');
+        const copyButton = document.getElementById('copyButton');
+        const deficienciesContainer = document.getElementById('deficienciesContainer');
+
         // --- Fungsi untuk memuat daftar kekurangan ke halaman ---
         function loadDeficiencies() {
-            const container = document.getElementById('deficienciesContainer');
             deficienciesList.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'checkbox-item';
@@ -177,21 +190,18 @@
 
                 div.appendChild(checkbox);
                 div.appendChild(label);
-                container.appendChild(div);
+                deficienciesContainer.appendChild(div);
             });
         }
         
         // --- Fungsi utama untuk menghasilkan laporan ---
         function generateReport() {
-            // 1. Ambil nama LOP dari input
-            const lopName = document.getElementById('lopName').value.trim();
-
+            const lopName = lopNameInput.value.trim();
             if (!lopName) {
                 alert("Harap isi Nama LOP terlebih dahulu!");
                 return;
             }
 
-            // 2. Kumpulkan semua kekurangan yang dicentang
             const selectedDeficiencies = [];
             const checkboxes = document.querySelectorAll('.deficiency-checkbox:checked');
             checkboxes.forEach(checkbox => {
@@ -203,36 +213,52 @@
                 return;
             }
 
-            // 3. Gabungkan menjadi format yang diinginkan
-            let reportText = `${lopName.toUpperCase()}\n`; // Nama LOP dibuat kapital
+            let reportText = `${lopName.toUpperCase()}\n`;
             reportText += `KURANG\n`;
             reportText += selectedDeficiencies.join('\n');
 
-            // 4. Tampilkan hasilnya di textarea
-            document.getElementById('output').value = reportText;
+            outputArea.value = reportText;
         }
         
         // --- Fungsi untuk menyalin teks ke clipboard ---
         function copyToClipboard() {
-            const outputArea = document.getElementById('output');
             const textToCopy = outputArea.value;
-
             if (!textToCopy) {
                 alert("Tidak ada teks untuk disalin. Buat laporan terlebih dahulu.");
                 return;
             }
 
             navigator.clipboard.writeText(textToCopy).then(() => {
-                const copyButton = document.getElementById('copyButton');
                 const originalText = copyButton.innerText;
                 copyButton.innerText = 'Berhasil Disalin!';
                 setTimeout(() => {
                     copyButton.innerText = originalText;
-                }, 2000); // Kembalikan teks tombol setelah 2 detik
+                }, 2000);
             }).catch(err => {
                 console.error('Gagal menyalin teks: ', err);
                 alert("Gagal menyalin teks.");
             });
+        }
+
+        // --- Fungsi BARU untuk mereset semua input ---
+        function resetForm() {
+            // 1. Kosongkan input Nama LOP
+            lopNameInput.value = '';
+
+            // 2. Hilangkan centang pada semua checkbox
+            const checkboxes = document.querySelectorAll('.deficiency-checkbox:checked');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+
+            // 3. Kosongkan area output
+            outputArea.value = '';
+
+            // 4. Kembalikan teks tombol salin ke semula (jika perlu)
+            copyButton.innerText = 'Salin Teks';
+            
+            // 5. Fokuskan kursor kembali ke input Nama LOP
+            lopNameInput.focus();
         }
         
         // --- Panggil fungsi untuk memuat daftar saat halaman pertama kali dibuka ---
