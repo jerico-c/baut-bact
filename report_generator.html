@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generator Laporan BACT BAUT</title>
+    <title>Generator Naufal</title>
     <style>
         /* CSS untuk styling halaman */
         body {
@@ -70,16 +70,10 @@
             margin-right: 10px;
         }
 
-        .button-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
         button {
             width: 100%;
             padding: 12px;
+            background-color: #3498db;
             color: white;
             border: none;
             border-radius: 5px;
@@ -87,15 +81,10 @@
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.3s;
-        }
-        
-        #generateButton {
-             background-color: #3498db;
-             /* Menjadikan tombol ini memenuhi 2 kolom */
-             grid-column: 1 / -1;
+            margin-top: 10px;
         }
 
-        #generateButton:hover {
+        button:hover {
             background-color: #2980b9;
         }
 
@@ -105,14 +94,6 @@
         
         #copyButton:hover {
             background-color: #27ae60;
-        }
-
-        #resetButton {
-            background-color: #e74c3c;
-        }
-
-        #resetButton:hover {
-            background-color: #c0392b;
         }
 
         textarea {
@@ -131,7 +112,7 @@
 <body>
 
     <div class="container">
-        <h1>Generator Laporan Kekurangan</h1>
+        <h1>Generator fal</h1>
         
         <div class="form-group">
             <label for="lopName">Nama LOP:</label>
@@ -144,36 +125,43 @@
                 </div>
         </div>
 
-        <button id="generateButton" onclick="generateReport()">Buat Laporan</button>
+        <button onclick="generateReport()">Buat Laporan</button>
 
         <div class="form-group" style="margin-top: 25px;">
             <label for="output">Hasil Laporan (Siap Disalin):</label>
             <textarea id="output" readonly></textarea>
-            <div class="button-group">
-                <button id="copyButton" onclick="copyToClipboard()">Salin Teks</button>
-                <button id="resetButton" onclick="resetForm()">Ulangi</button>
-            </div>
+            <button id="copyButton" onclick="copyToClipboard()">Salin Teks</button>
         </div>
     </div>
 
     <script>
         // --- Daftar semua kemungkinan kekurangan ---
         const deficienciesList = [
-            "ODP-PB-8-8 Solid lengkap", "KLEM-RING-5-LUBANG", "Pipa paralon",
-            "SC-OF-SM-24", "Redaman Input ODC", "TESTCOM", "PORT", "IN ODP",
-            "End-to-End", "Mancore", "LABEL ODP", "TERMINASI", "BARCODE",
-            "SPLIITER 1:4", "PANEL DISTRIBUSI", "FEEDER", "FOTO ODC", "SURVEY",
-            "SAMBUNGAN BRANCHING"
+            "ODP-PB-8-8 Solid lengkap",
+            "KLEM-RING-5-LUBANG",
+            "Pipa paralon",
+            "SC-OF-SM-24",
+            "Redaman Input ODC",
+            "TESTCOM",
+            "PORT",
+            "IN ODP",
+            "End-to-End",
+            "Mancore",
+            "LABEL ODP",
+            "TERMINASI",
+            "BARCODE",
+            "SPLIITER 1:4",
+            "PANEL DISTRIBUSI",
+            "FEEDER",
+            "FOTO ODC",
+            "SURVEY",
+            "SAMBUNGAN BRANCHING",
+            "BOQ"
         ];
-
-        // --- Variabel global untuk elemen yang sering diakses ---
-        const lopNameInput = document.getElementById('lopName');
-        const outputArea = document.getElementById('output');
-        const copyButton = document.getElementById('copyButton');
-        const deficienciesContainer = document.getElementById('deficienciesContainer');
 
         // --- Fungsi untuk memuat daftar kekurangan ke halaman ---
         function loadDeficiencies() {
+            const container = document.getElementById('deficienciesContainer');
             deficienciesList.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'checkbox-item';
@@ -190,18 +178,21 @@
 
                 div.appendChild(checkbox);
                 div.appendChild(label);
-                deficienciesContainer.appendChild(div);
+                container.appendChild(div);
             });
         }
         
         // --- Fungsi utama untuk menghasilkan laporan ---
         function generateReport() {
-            const lopName = lopNameInput.value.trim();
+            // 1. Ambil nama LOP dari input
+            const lopName = document.getElementById('lopName').value.trim();
+
             if (!lopName) {
                 alert("Harap isi Nama LOP terlebih dahulu!");
                 return;
             }
 
+            // 2. Kumpulkan semua kekurangan yang dicentang
             const selectedDeficiencies = [];
             const checkboxes = document.querySelectorAll('.deficiency-checkbox:checked');
             checkboxes.forEach(checkbox => {
@@ -213,52 +204,37 @@
                 return;
             }
 
-            let reportText = `${lopName.toUpperCase()}\n`;
+            // 3. Gabungkan menjadi format yang diinginkan
+            let reportText = `${lopName.toUpperCase()}\n`; // Nama LOP dibuat kapital
             reportText += `KURANG\n`;
             reportText += selectedDeficiencies.join('\n');
 
-            outputArea.value = reportText;
+            // 4. Tampilkan hasilnya di textarea
+            document.getElementById('output').value = reportText;
         }
         
         // --- Fungsi untuk menyalin teks ke clipboard ---
         function copyToClipboard() {
+            const outputArea = document.getElementById('output');
             const textToCopy = outputArea.value;
+
             if (!textToCopy) {
                 alert("Tidak ada teks untuk disalin. Buat laporan terlebih dahulu.");
                 return;
             }
 
             navigator.clipboard.writeText(textToCopy).then(() => {
+                // Beri notifikasi bahwa teks berhasil disalin
+                const copyButton = document.getElementById('copyButton');
                 const originalText = copyButton.innerText;
                 copyButton.innerText = 'Berhasil Disalin!';
                 setTimeout(() => {
                     copyButton.innerText = originalText;
-                }, 2000);
+                }, 2000); // Kembalikan teks tombol setelah 2 detik
             }).catch(err => {
                 console.error('Gagal menyalin teks: ', err);
                 alert("Gagal menyalin teks.");
             });
-        }
-
-        // --- Fungsi BARU untuk mereset semua input ---
-        function resetForm() {
-            // 1. Kosongkan input Nama LOP
-            lopNameInput.value = '';
-
-            // 2. Hilangkan centang pada semua checkbox
-            const checkboxes = document.querySelectorAll('.deficiency-checkbox:checked');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = false;
-            });
-
-            // 3. Kosongkan area output
-            outputArea.value = '';
-
-            // 4. Kembalikan teks tombol salin ke semula (jika perlu)
-            copyButton.innerText = 'Salin Teks';
-            
-            // 5. Fokuskan kursor kembali ke input Nama LOP
-            lopNameInput.focus();
         }
         
         // --- Panggil fungsi untuk memuat daftar saat halaman pertama kali dibuka ---
